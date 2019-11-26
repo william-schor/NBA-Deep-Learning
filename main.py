@@ -125,7 +125,9 @@ def player_matrix():
 
     for game_info in team_games:
         team_id = game_info[0]
-        print(f"Running calculations for {team.find_team_name_by_id(team_id)}...")
+        print(
+            f"Running calculations for {teams.find_team_name_by_id(team_id)['full_name']}..."
+        )
         game_set = game_info[1]
         i = 0
         for game_id in game_set:
@@ -152,7 +154,6 @@ def player_matrix():
     for chron_game in all_games:
         chron_game_id = chron_game[1]
         for p_id in players_dict:
-            p_id = 1627752
             if players_dict[p_id][chron_game_id] is not None:
                 if chron_game_id != prev_game_id:
                     if players_dict[p_id][prev_game_id] is not None:
@@ -169,7 +170,6 @@ def player_matrix():
                     player_game_count_dict[p_id] = 1
             else:
                 players_dict[p_id][chron_game_id] = players_dict[p_id][prev_game_id]
-            break
         prev_game_id = chron_game_id
 
     # The final dictionary is: (num_players, num_games, num_stats)
