@@ -62,10 +62,10 @@ def win_loss_per_roster():
         )
         converted_traditional = json.loads(traditionalBoxScore.get_json())
         plus_minus_team_one = converted_traditional["resultSets"][0]["rowSet"][0][-1]
-        team_one_win = 0
-        if plus_minus_team_one > 0:
-            team_one_win = 1
-        data.append([spec_game_id, team_one_players, team_two_players, team_one_win])
+#         team_one_win = 0
+#         if plus_minus_team_one > 0:
+#             team_one_win = 1
+        data.append([spec_game_id, team_one_players, team_two_players, plus_minus_team_one])
 
         return data
 
