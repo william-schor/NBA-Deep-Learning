@@ -78,9 +78,14 @@ def test(model, test_games, test_labels, player_matrix):
     labels = get_labels(test_games, 0, len(test_games))
     logits = model(stats)
     loss = nba_loss.loss_function(line, logits, labels)
+    return loss
 
 
 def main():
+    model = Model(inputs)
+    train(player_matrix, game_id, roster1, roster2)
+    loss_val = test(model, test_games, test_labels, player_matrix)
+    
     pass
 
 
