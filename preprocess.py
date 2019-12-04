@@ -151,7 +151,7 @@ def player_matrix(team_ids):
                 if player_line[BOXSCORE_TEAM_ID] == team_id:
                     # update player matrix
                     if player_line[BOXSCORE_STAT_START] is None:
-                        # DNP case
+                        # DNP (coach's decision) case
                         continue
                     player_line[BOXSCORE_STAT_START] = int(
                         player_line[BOXSCORE_STAT_START].split(":")[0]
