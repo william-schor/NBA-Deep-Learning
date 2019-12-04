@@ -13,12 +13,15 @@ f(str, int): finds the int in the str and returns the index
 import os
 import sys
 import bisect
+import json
 import numpy as np
+import file_dumps
 from datetime import datetime
 from collections import OrderedDict
 
 ## NBA APIs
 from nba_api.stats.endpoints import boxscoreadvancedv2
+from nba_api.stats.endpoints import boxscoretraditionalv2
 from nba_api.stats.endpoints import teamgamelog
 from nba_api.stats.static import teams
 from nba_api.stats.static import players
@@ -39,7 +42,7 @@ BOXSCORE_PLAYER_ID = 4
 BOXSCORE_STAT_START = 8
 
 
-def win_loss_per_roster():
+def win_loss_per_roster(list_game_ids):
     data = []
     for spec_game_id in list_game_ids:
         print(f"Current Game ID {spec_game_id}")
@@ -65,7 +68,15 @@ def win_loss_per_roster():
         team_one_win = 0
         if plus_minus_team_one > 0:
             team_one_win = 1
-        data.append([spec_game_id, team_one_players, team_two_players, team_one_win])
+        data.append(
+            [
+                spec_game_id,
+                team_one_id,
+                team_one_players,
+                team_two_players,
+                team_one_win,
+            ]
+        )
 
         return data
 
@@ -107,9 +118,9 @@ def get_games(team_ids):
     return team_games, list(all_games)
 
 
-def player_matrix():
+def player_matrix(team_ids):
     # dictionary with every player id
-    team_ids = [team["id"] for team in teams.get_teams()]
+
     team_games, all_games = get_games(team_ids)
 
     players_dict = fill_player_dict(all_games)
@@ -130,7 +141,7 @@ def player_matrix():
         )
         game_set = game_info[1]
         i = 0
-        for game_id in game_set:
+        for game_id in game_set[:5]:
             print(f"{i} games done")
             i += 1
             boxscore = boxscoreadvancedv2.BoxScoreAdvancedV2(
@@ -174,7 +185,7 @@ def player_matrix():
 
     # The final dictionary is: (num_players, num_games, num_stats)
     # each player id and game id is a key. The stats are stored in a numpy array
-    return players_dict
+    return players_dict, all_games
 
 
 def main():
@@ -183,10 +194,11 @@ def main():
 
 # This is a test example with Taurean Prince (ATL). His PID is 1627752
 if __name__ == "__main__":
-    pd = player_matrix()
-    i = 0
-    for gid in pd[1627752]:
-        if pd[1627752][gid] is not None:
-            i += 1
-            print(float(pd[1627752][gid][0]))
-    print(i)
+    team_ids = [team["id"] for team in teams.get_teams()[:1]]
+
+    pd, all_games = player_matrix(team_ids)
+    wl_per_rosters = win_loss_per_roster([x[1] for x in all_games[:4]])
+    wl_per_rosters = np.array(wl_per_rosters)
+
+    file_dumps.write_dict(pd, "player_dict.json")
+    file_dumps.write_np_arr(wl_per_rosters, "wl_per_rosters.npy")
