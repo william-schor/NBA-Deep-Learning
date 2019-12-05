@@ -169,6 +169,10 @@ def create_player_matrix_from_api(team_ids):
                 players_dict[p_id][chron_game_id] = players_dict[p_id][prev_game_id]
         prev_game_id = chron_game_id
 
+    for player in players_dict:
+        for game in players_dict[player]:
+            if players_dict[player][game] is None:
+                players_dict[player][game] = np.zeros(23)
     # The final dictionary is: (num_players, num_games, num_stats)
     # each player id and game id is a key. The stats are stored in a numpy array
     return players_dict, all_games
@@ -276,10 +280,21 @@ def create_player_matrix_from_local(filename):
                 players_dict[p_id][chron_game_id] = players_dict[p_id][prev_game_id]
         prev_game_id = chron_game_id
 
+    for player in players_dict:
+        for game in players_dict[player]:
+            if players_dict[player][game] is None:
+                players_dict[player][game] = np.zeros(23)
     # The final dictionary is: (num_players, num_games, num_stats)
     # each player id and game id is a key. The stats are stored in a numpy array
     print("-------------------------------------------")
     file_dumps.write_player_dict(players_dict, filename)
+
+
+def get_data(roster_file, matrix_file):
+    nparr = file_dumps.read_numpy_arr(roster_file)
+    pd = file_dumps.read_json(matrix_file)
+
+    return pd, nparr
 
 
 if __name__ == "__main__":
