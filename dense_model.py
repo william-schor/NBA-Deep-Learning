@@ -57,9 +57,9 @@ def train(model, wl_per_rosters, player_matrix, line_dict):
 
             batch_stats = np.array(batch_stats)
             print(batch_stats.shape)
-            import sys
+            # import sys
 
-            sys.exit(0)
+            # sys.exit(0)
 
             logits = model(
                 tf.convert_to_tensor(np.array(batch_stats), dtype=tf.float32)
@@ -86,9 +86,13 @@ def get_stats(player_matrix, game_id, roster1, roster2):
     for player in roster1:
         # may contains None
         end_matrix.append(np.array(player_matrix[player][game_id]))
+    while(len(end_matrix) < 13):
+        end_matrix.append(np.zeros(23))
     for player in roster2:
         # may contains None
         end_matrix.append(np.array(player_matrix[player][game_id]))
+    while(len(end_matrix) < 26):
+        end_matrix.append(np.zeros(23))
     stack = np.dstack(end_matrix)
     print(f"EM shape: {stack.shape}")
     return stack
