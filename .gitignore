@@ -95,3 +95,4 @@ venv.bak/
 
 # Pre Commit
 .pre-commit-config.yaml
+final_data/

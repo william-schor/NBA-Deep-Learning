@@ -2,7 +2,8 @@ import json
 import numpy as np
 
 
-def write_dict(pd, filename):
+# Use read_json to read
+def write_player_dict(pd, filename):
     with open(filename, "w") as file:
         # numpy cant be JSONed, so convert
         for key1 in pd:
@@ -19,12 +20,18 @@ def write_np_arr(arr, filename):
     print(f"file written: {filename}")
 
 
-def read_dict(filename):
+def write_json(o, filename):
+    with open(filename, "w") as file:
+        file.write(json.dumps(o))
+    print(f"file written: {filename}")
+
+
+def read_json(filename):
     with open(filename) as f:
         pd = json.load(f)
     return pd
 
 
 def read_numpy_arr(filename):
-    arr = np.load("wl_per_rosters.npy", allow_pickle=True)
+    arr = np.load(filename, allow_pickle=True)
     return arr
