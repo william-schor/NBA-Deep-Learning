@@ -4,6 +4,7 @@ import numpy as np
 import random
 import nba_loss
 import preprocess
+import lines
 
 from tensorflow.keras.layers import (
     Dense,
@@ -39,7 +40,7 @@ class Model(tf.keras.Model):
         return self.model(inputs)
 
 
-def train(model, wl_per_rosters, player_matrix):
+def train(model, wl_per_rosters, player_matrix, line_dict):
     num_iterations = len(wl_per_rosters) // model.batch_size
 
     for i in range(num_iterations):
@@ -65,7 +66,11 @@ def train(model, wl_per_rosters, player_matrix):
             )
 
             labels = get_labels(wl_per_rosters, i, model.batch_size)
-            loss = nba_loss.loss_function(line, logits, labels)
+
+            ## Here are your lines!
+            line_set = lines.get_lines(line_dict, batch_games)
+
+            loss = nba_loss.loss_function(line_set, logits, labels)
 
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -108,7 +113,8 @@ def main(roster_file, matrix_file):
     model = Model()
     print("model defined...")
     print("training...")
-    train(model, wl_per_rosters, player_matrix2)
+    line_dict = lines.build_line_dict()
+    train(model, wl_per_rosters, player_matrix2, line_dict)
     loss_val = test(model, test_games, test_labels, player_matrix)
 
 
