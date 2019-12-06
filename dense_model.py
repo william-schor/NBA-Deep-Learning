@@ -119,9 +119,11 @@ def main(roster_file, matrix_file):
     print("model defined...")
     print("training...")
     
+    
+    wl_per_rosters = wl_per_rosters[105:]
     ########### random sample of games, split into test and train set
-    cut = len(game_list) * 0.8
-    shuffled_games = random.shuffle(game_list)
+    cut = len(wl_per_rosters) * 0.8
+    shuffled_games = random.shuffle(wl_per_rosters)
     train_games = shuffled_games[:cut]
     test_games = shuffled_games[cut:] 
     #############
