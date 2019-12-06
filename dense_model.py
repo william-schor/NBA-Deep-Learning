@@ -86,12 +86,12 @@ def get_stats(player_matrix, game_id, roster1, roster2):
     end_matrix = []
     for player in roster1:
         # may contains None
-        end_matrix.append(np.array(player_matrix[player][game_id]))
+        end_matrix.append(np.array(player_matrix[player][game_id - 1]))
     while(len(end_matrix) < 13):
         end_matrix.append(np.zeros(23))
     for player in roster2:
         # may contains None
-        end_matrix.append(np.array(player_matrix[player][game_id]))
+        end_matrix.append(np.array(player_matrix[player][game_id - 1]))
     while(len(end_matrix) < 26):
         end_matrix.append(np.zeros(23))
     stack = np.dstack(end_matrix)
