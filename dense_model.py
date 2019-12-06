@@ -71,11 +71,11 @@ def train(model, wl_per_rosters, player_matrix, line_dict):
             line_set = lines.get_lines(line_dict, batch_games)
 
             loss = nba_loss.eric_loss_function(line_set, logits, labels)
-            print("loss", loss)
+            # print("loss", loss)
 
-        print(model.trainable_variables)
+        # print(model.trainable_variables)
         gradients = tape.gradient(loss, model.trainable_variables)
-        print("grads", gradients)
+        # print("grads", gradients)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
 
