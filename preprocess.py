@@ -13,7 +13,6 @@ import bisect
 import json
 import numpy as np
 import file_dumps
-import seasons
 from datetime import datetime
 from collections import OrderedDict
 
@@ -68,7 +67,16 @@ def fill_player_dict(all_games):
         player_dict[player["id"]] = dict.fromkeys([game[1] for game in all_games])
         for game in all_games:
             player_dict[player["id"]][game[1]] = None
-    
+
+    # Edge case for incomplete api
+    player_dict[1628454] = dict.fromkeys([game[1] for game in all_games])
+    for game in all_games:
+        player_dict[1628454][game[1]] = None
+
+    player_dict[1628473] = dict.fromkeys([game[1] for game in all_games])
+    for game in all_games:
+        player_dict[1628473][game[1]] = None
+
     return player_dict
 
 
