@@ -47,7 +47,6 @@ def train(model, wl_per_rosters, player_matrix, line_dict):
         print(f"batch number: {i}")
         with tf.GradientTape() as tape:
 
-
             batch_games = wl_per_rosters[
                 i * model.batch_size : (i + 1) * model.batch_size
             ]
@@ -62,7 +61,9 @@ def train(model, wl_per_rosters, player_matrix, line_dict):
 
             # sys.exit(0)
 
-            logits = model(tf.convert_to_tensor(np.array(batch_stats), dtype=tf.float32))
+            logits = model(
+                tf.convert_to_tensor(np.array(batch_stats), dtype=tf.float32)
+            )
 
             labels = get_labels(wl_per_rosters, i, model.batch_size)
 
@@ -89,12 +90,12 @@ def get_stats(player_matrix, game_id, roster1, roster2):
     for player in roster1:
         # may contains None
         end_matrix.append(np.array(player_matrix[player]["00" + str(int(game_id) - 1)]))
-    while(len(end_matrix) < 13):
+    while len(end_matrix) < 13:
         end_matrix.append(np.zeros(23))
     for player in roster2:
         # may contains None
         end_matrix.append(np.array(player_matrix[player]["00" + str(int(game_id) - 1)]))
-    while(len(end_matrix) < 26):
+    while len(end_matrix) < 26:
         end_matrix.append(np.zeros(23))
     stack = np.dstack(end_matrix)
     print(f"EM shape: {stack.shape}")
@@ -116,22 +117,53 @@ def main(roster_file, matrix_file):
     for key in player_matrix:
         player_matrix2[int(key)] = player_matrix[key]
 
+    ##############
+    from nba_api.stats.static import players
+    import sys
+
+    for key in player_matrix2:
+        if players.find_player_by_id(key) is None:
+            print(key)
+            print("ABOVE KEY IS NOT A PLAYER!")
+            sys.exit(0)
+    print("All keys are players in player matrix")
+    print("----------------------------------")
+
+    for game in wl_per_rosters:
+        for player in game[1]:
+            if players.find_player_by_id(player) is None:
+                print(player)
+                print("ABOVE KEY IS NOT A PLAYER!")
+                print(f"Game id: {game[0]}")
+                print("Roster 1")
+                print("----------------------------------")
+        for player in game[2]:
+            if players.find_player_by_id(player) is None:
+                print(player)
+                print("ABOVE KEY IS NOT A PLAYER!")
+                print(f"Game id: {game[0]}")
+                print("Roster 2")
+                print("----------------------------------")
+
+    print("All keys are players in rosters")
+    sys.exit(0)
+    ##############
     print("data loaded...")
     model = Model()
     print("model defined...")
-    
-    
-    
-    wl_per_rosters = wl_per_rosters[104:] # get rid of first 104 games bc no monyline data
+
+    wl_per_rosters = wl_per_rosters[
+        104:
+    ]  # get rid of first 104 games bc no monyline data
     ########### random sample of games, split into test and train set
     cut = int(len(wl_per_rosters) * 0.8)
     print("cut", cut)
     random.shuffle(wl_per_rosters)
     # print(shuffled_games)
     train_games = wl_per_rosters[:cut]
-    test_games = wl_per_rosters[cut:] 
+    test_games = wl_per_rosters[cut:]
     #############
-    
+
     line_dict = lines.build_line_dict()
     print("training...")
     train(model, train_games, player_matrix2, line_dict)
