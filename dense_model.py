@@ -118,6 +118,14 @@ def main(roster_file, matrix_file):
     model = Model()
     print("model defined...")
     print("training...")
+    
+    ########### random sample of games, split into test and train set
+    cut = len(game_list) * 0.8
+    shuffled_games = random.shuffle(game_list)
+    train_games = shuffled_games[:cut]
+    test_games = shuffled_games[cut:] 
+    #############
+    
     line_dict = lines.build_line_dict()
     train(model, wl_per_rosters, player_matrix2, line_dict)
     loss_val = test(model, test_games, test_labels, player_matrix)
