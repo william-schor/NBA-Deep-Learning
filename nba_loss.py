@@ -40,3 +40,23 @@ def us2dec(line):
     else:
         dec = 1 - (100 / line)
     return dec
+
+def eric_loss_function(lines, predictions, team1_wins):
+    loss = []
+    c = 1
+    for line, prediction, team1_win in zip(lines, predictions, team1_wins):
+        a = tf.math.square(prediction - team1_win)
+        b = c * tf.math.square(prediction - (1 / calc_team1_odds(line)))
+        loss.append(a - b)
+    avg_loss = tf.reduce_mean(loss)
+    return avg_loss
+
+# def cross_entropy_loss(lines, predictions, team1_wins):
+#     pass
+#     loss = []
+#     for line, prediction, team1_win in zip(lines, predictions, team1_wins):
+#         tf.
+#     return tf.reduce_mean(loss)
+
+
+
