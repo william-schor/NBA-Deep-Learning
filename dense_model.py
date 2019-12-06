@@ -120,7 +120,7 @@ def main(roster_file, matrix_file):
     print("training...")
     
     
-    wl_per_rosters = wl_per_rosters[105:] # get rid of first 105 games bc no monyline data
+    wl_per_rosters = wl_per_rosters[104:] # get rid of first 105 games bc no monyline data
     ########### random sample of games, split into test and train set
     cut = len(wl_per_rosters) * 0.8
     shuffled_games = random.shuffle(wl_per_rosters)
