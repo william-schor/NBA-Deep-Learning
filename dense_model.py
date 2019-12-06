@@ -46,6 +46,7 @@ def train(model, wl_per_rosters, player_matrix, line_dict):
     for i in range(num_iterations):
         print(f"batch number: {i}")
         with tf.GradientTape() as tape:
+            
 
             batch_games = wl_per_rosters[
                 i * model.batch_size : (i + 1) * model.batch_size
@@ -68,12 +69,15 @@ def train(model, wl_per_rosters, player_matrix, line_dict):
             labels = get_labels(wl_per_rosters, i, model.batch_size)
 
             ## Here are your lines!
-            print (f'Format of a batch of games {batch_games}')
+            # print (f'Format of a batch of games {batch_games}')
             line_set = lines.get_lines(line_dict, batch_games)
 
             loss = nba_loss.loss_function(line_set, logits, labels)
+            print("loss", loss)
 
+        print(model.trainable_variables)
         gradients = tape.gradient(loss, model.trainable_variables)
+        print("grads", gradients)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
 
