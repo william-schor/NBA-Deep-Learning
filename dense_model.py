@@ -129,7 +129,7 @@ def main(roster_file, matrix_file):
     #############
     
     line_dict = lines.build_line_dict()
-    train(model, wl_per_rosters, player_matrix2, line_dict)
+    train(model, train_games, player_matrix2, line_dict)
     loss_val = test(model, test_games, test_labels, player_matrix)
 
 
