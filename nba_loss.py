@@ -1,6 +1,9 @@
 import tensorflow as tf
+import sys
+import numpy as np
 
 BET_SIZE = 100
+
 
 def loss_function(lines, predictions, team1_wins):
     profits = []
@@ -41,9 +44,10 @@ def us2dec(line):
         dec = 1 - (100 / line)
     return dec
 
+
 def eric_loss_function(lines, predictions, team1_wins):
     loss = []
-    c = 1
+    c = 0.5
     for line, prediction, team1_win in zip(lines, predictions, team1_wins):
         a = tf.math.square(prediction - team1_win)
         b = c * tf.math.square(prediction - (1 / calc_team1_odds(line)))
@@ -51,12 +55,9 @@ def eric_loss_function(lines, predictions, team1_wins):
     avg_loss = tf.reduce_mean(loss)
     return avg_loss
 
-# def cross_entropy_loss(lines, predictions, team1_wins):
-#     pass
-#     loss = []
-#     for line, prediction, team1_win in zip(lines, predictions, team1_wins):
-#         tf.
-#     return tf.reduce_mean(loss)
 
-
-
+def cross_entropy_loss(predictions, team1_wins):
+    # predictions = [1.0 if x > .5 else 0.0 for x in predictions]
+    # team1_wins = [1.0 if t else 0.0 for t in team1_wins]
+    bce = tf.keras.losses.BinaryCrossentropy()
+    return bce(team1_wins, predictions)

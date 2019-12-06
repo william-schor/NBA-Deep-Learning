@@ -201,6 +201,9 @@ def create_wl_per_roster_from_local(filename):
     season = file_dumps.read_json("schedule/nba2017_18")
     rows = season["resultSets"][0]["rowSet"]
     rows.sort(key=lambda x: x[4])
+    ag = list(ag)
+    ag.sort(key=lambda x: x[1])
+    ag = np.array(ag)
     rows = remove_away_teams(rows)
 
     season_games = {}
