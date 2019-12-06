@@ -117,37 +117,6 @@ def main(roster_file, matrix_file):
     for key in player_matrix:
         player_matrix2[int(key)] = player_matrix[key]
 
-    ##############
-    from nba_api.stats.static import players
-    import sys
-
-    for key in player_matrix2:
-        if players.find_player_by_id(key) is None:
-            print(key)
-            print("ABOVE KEY IS NOT A PLAYER!")
-            sys.exit(0)
-    print("All keys are players in player matrix")
-    print("----------------------------------")
-
-    for game in wl_per_rosters:
-        for player in game[1]:
-            if players.find_player_by_id(player) is None:
-                print(player)
-                print("ABOVE KEY IS NOT A PLAYER!")
-                print(f"Game id: {game[0]}")
-                print("Roster 1")
-                print("----------------------------------")
-        for player in game[2]:
-            if players.find_player_by_id(player) is None:
-                print(player)
-                print("ABOVE KEY IS NOT A PLAYER!")
-                print(f"Game id: {game[0]}")
-                print("Roster 2")
-                print("----------------------------------")
-
-    print("All keys are players in rosters")
-    sys.exit(0)
-    ##############
     print("data loaded...")
     model = Model()
     print("model defined...")
