@@ -86,12 +86,12 @@ def get_stats(player_matrix, game_id, roster1, roster2):
     end_matrix = []
     for player in roster1:
         # may contains None
-        end_matrix.append(np.array(player_matrix[player][game_id - 1]))
+        end_matrix.append(np.array(player_matrix[player]["00" + str(int(game_id) - 1)]))
     while(len(end_matrix) < 13):
         end_matrix.append(np.zeros(23))
     for player in roster2:
         # may contains None
-        end_matrix.append(np.array(player_matrix[player][game_id - 1]))
+        end_matrix.append(np.array(player_matrix[player]["00" + str(int(game_id) - 1)]))
     while(len(end_matrix) < 26):
         end_matrix.append(np.zeros(23))
     stack = np.dstack(end_matrix)
@@ -117,18 +117,21 @@ def main(roster_file, matrix_file):
     print("data loaded...")
     model = Model()
     print("model defined...")
-    print("training...")
+    
     
     
     wl_per_rosters = wl_per_rosters[104:] # get rid of first 104 games bc no monyline data
     ########### random sample of games, split into test and train set
-    cut = len(wl_per_rosters) * 0.8
-    shuffled_games = random.shuffle(wl_per_rosters)
-    train_games = shuffled_games[:cut]
-    test_games = shuffled_games[cut:] 
+    cut = int(len(wl_per_rosters) * 0.8)
+    print("cut", cut)
+    random.shuffle(wl_per_rosters)
+    # print(shuffled_games)
+    train_games = wl_per_rosters[:cut]
+    test_games = wl_per_rosters[cut:] 
     #############
     
     line_dict = lines.build_line_dict()
+    print("training...")
     train(model, train_games, player_matrix2, line_dict)
     loss_val = test(model, test_games, test_labels, player_matrix)
 

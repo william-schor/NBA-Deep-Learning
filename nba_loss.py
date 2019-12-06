@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+BET_SIZE = 100
 
 def loss_function(lines, predictions, team1_wins):
     profits = []
