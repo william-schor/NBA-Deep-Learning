@@ -56,7 +56,9 @@ def train(model, wl_per_rosters, player_matrix, line_dict):
                 batch_stats.append(get_stats(player_matrix, game[0], game[1], game[2]))
 
             batch_stats = np.array(batch_stats)
-            print(batch_stats.shape)
+            print("batch_stats shape", batch_stats.shape)
+            np.reshape(batch_stats, (10, 23, 26))
+            print("batch_stats shape after", batch_stats.shape)
             # import sys
 
             # sys.exit(0)
@@ -72,7 +74,7 @@ def train(model, wl_per_rosters, player_matrix, line_dict):
             line_set = lines.get_lines(line_dict, batch_games)
 
             loss = nba_loss.eric_loss_function(line_set, logits, labels)
-            # print("loss", loss)
+            print("loss", loss)
 
         # print(model.trainable_variables)
         gradients = tape.gradient(loss, model.trainable_variables)
@@ -98,7 +100,7 @@ def get_stats(player_matrix, game_id, roster1, roster2):
     while len(end_matrix) < 26:
         end_matrix.append(np.zeros(23))
     stack = np.dstack(end_matrix)
-    print(f"EM shape: {stack.shape}")
+    # print(f"EM shape: {stack.shape}")
     return stack
 
 
@@ -157,7 +159,7 @@ def main(roster_file, matrix_file):
     ]  # get rid of first 104 games bc no monyline data
     ########### random sample of games, split into test and train set
     cut = int(len(wl_per_rosters) * 0.8)
-    print("cut", cut)
+    # print("cut", cut)
     random.shuffle(wl_per_rosters)
     # print(shuffled_games)
     train_games = wl_per_rosters[:cut]
