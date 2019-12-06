@@ -69,7 +69,9 @@ def train(model, wl_per_rosters, player_matrix, line_dict):
 
             ## Here are your lines!
             # print (f'Format of a batch of games {batch_games}')
-            line_set = lines.get_lines(line_dict, batch_games)
+            line_set = lines.get_lines(
+                line_dict, [int(game[0]) for game in batch_games]
+            )
 
             loss = nba_loss.eric_loss_function(line_set, logits, labels)
             # print("loss", loss)
