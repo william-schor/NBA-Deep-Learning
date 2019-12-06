@@ -68,7 +68,7 @@ def fill_player_dict(all_games):
         player_dict[player["id"]] = dict.fromkeys([game[1] for game in all_games])
         for game in all_games:
             player_dict[player["id"]][game[1]] = None
-
+    
     return player_dict
 
 
