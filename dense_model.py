@@ -5,6 +5,7 @@ import random
 import nba_loss
 import preprocess
 import lines
+import sys
 
 from tensorflow.keras.layers import (
     Dense,
@@ -63,35 +64,38 @@ class Model(tf.keras.Model):
         return o6
         # return self.model(inputs)
 
+    def cross_entropy_loss(self, predictions, team1_wins):
+        bce = tf.keras.losses.BinaryCrossentropy()
+        return bce(team1_wins, predictions)
+
 
 def train(model, wl_per_rosters, player_matrix, line_dict):
     num_iterations = len(wl_per_rosters) // model.batch_size
 
     for i in range(num_iterations):
+        wl_per_rosters = wl_per_rosters[::-1]
+        batch_games = wl_per_rosters[i * model.batch_size : (i + 1) * model.batch_size]
+
+        batch_stats = []
+        for game in batch_games:
+            batch_stats.append(get_stats(player_matrix, game[0], game[1], game[2]))
+        batch_stats = tf.convert_to_tensor(np.array(batch_stats), dtype=tf.float32)
+
+        print(batch_stats)
+
         with tf.GradientTape() as tape:
-            wl_per_rosters = wl_per_rosters[::-1]
-            batch_games = wl_per_rosters[
-                i * model.batch_size : (i + 1) * model.batch_size
-            ]
 
-            batch_stats = []
-            for game in batch_games:
-                batch_stats.append(get_stats(player_matrix, game[0], game[1], game[2]))
-
-            print(batch_stats[0])
-            logits = model(
-                tf.convert_to_tensor(np.array(batch_stats), dtype=tf.float32)
-            )
-
+            logits = model.call(batch_stats)
             labels = get_labels(wl_per_rosters, i, model.batch_size)
 
-            line_set = lines.get_lines(
-                line_dict, [int(game[0]) for game in batch_games]
-            )
+            # line_set = lines.get_lines(
+            #     line_dict, [int(game[0]) for game in batch_games]
+            # )
 
             # loss = nba_loss.eric_loss_function(line_set, logits, labels)
-            loss = nba_loss.cross_entropy_loss(logits, labels)
-            print(loss)
+            loss = model.cross_entropy_loss(logits, labels)
+            tf.print(loss)
+            print(model.d4.get_weights())
 
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -104,10 +108,7 @@ def get_labels(wl_per_rosters, i, scale):
 def get_stats(player_matrix, game_id, roster1, roster2):
     # roster is a list of player ids
     end_matrix = []
-    print(game_id)
     for player in roster1:
-        print(players.find_player_by_id(player))
-        print(player_matrix[player]["00" + str(int(game_id) - 1)])
         end_matrix.append(np.array(player_matrix[player]["00" + str(int(game_id) - 1)]))
     while len(end_matrix) < 13:
         end_matrix.append(np.zeros(23))
@@ -116,13 +117,7 @@ def get_stats(player_matrix, game_id, roster1, roster2):
     while len(end_matrix) < 26:
         end_matrix.append(np.zeros(23))
 
-    import sys
-
-    sys.exit(0)
-
-    # stack = np.dstack(end_matrix)
-
-    # return stack[0]
+    return np.array(end_matrix)
 
 
 def test(model, wl_per_rosters, player_matrix, line_dict):
@@ -143,7 +138,7 @@ def test(model, wl_per_rosters, player_matrix, line_dict):
 def main(roster_file, matrix_file):
     print("Reading data from file...")
     player_matrix, wl_per_rosters = preprocess.get_data(roster_file, matrix_file)
-
+    wl_per_rosters = [x for x in wl_per_rosters if x[3] == False]
     player_matrix2 = {}
     for key in player_matrix:
         player_matrix2[int(key)] = player_matrix[key]
