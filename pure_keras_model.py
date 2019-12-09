@@ -70,7 +70,7 @@ model.build(train_x.shape)
 model.summary()
 
 
-history = model.fit(x=train_x, y=train_y, epochs=75, shuffle=True)
+history = model.fit(x=train_x, y=train_y, epochs=20, shuffle=True)
 
 score = model.evaluate(test_x, test_y)
 print("eval score:", score)
