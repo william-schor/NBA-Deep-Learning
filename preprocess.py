@@ -308,6 +308,41 @@ def get_data(roster_file, matrix_file):
     return pd, nparr
 
 
+def get_2d_data(wl_per_rosters, player_matrix):
+    data = []
+
+    for game in wl_per_rosters:
+        # home roster
+        row = []
+        for player in game[1]:
+            stats = player_matrix[player][game[0]]
+            row.append(stats)
+        for player in game[2]:
+            stats = player_matrix[player][game[0]]
+            row.append(stats)
+
+        while len(row) < 26:
+            row.append(np.zeros(23))
+
+        data.append(np.array(row).flatten())
+
+    return np.array(data)
+
+
 if __name__ == "__main__":
-    create_wl_per_roster_from_local("final_data/wl_per_rosters_2.npy")
-    create_player_matrix_from_local("final_data/player_dict_2.json")
+    # create_wl_per_roster_from_local("final_data/wl_per_rosters_2.npy")
+    # create_player_matrix_from_local("final_data/player_dict_2.json")
+
+    pd, wlpr = get_data(
+        "final_data/wl_per_rosters_2.npy", "final_data/player_dict_2.json"
+    )
+
+    player_matrix2 = {}
+    for key in pd:
+        player_matrix2[int(key)] = pd[key]
+
+    data = get_2d_data(wlpr, player_matrix2)
+
+    print(len(data))
+    print(len(data[0]))
+    print(data)
