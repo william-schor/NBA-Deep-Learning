@@ -30,29 +30,28 @@ test_x = all_data[cut:]
 test_y = np.array([1 if game[3] else 0 for game in wlpr[cut:]])
 
 
-model = tf.keras.models.Sequential(
-    [
-        # tf.keras.layers.Flatten(input_shape=train_x[0].shape),
-        tf.keras.layers.Dense(4096, activation=tf.nn.relu),
-        tf.keras.layers.Dropout(0.1),
-        tf.keras.layers.Dense(2048, activation=tf.nn.relu),
-        tf.keras.layers.Dropout(0.1),
-        tf.keras.layers.Dense(512, activation=tf.nn.relu),
-        tf.keras.layers.Dropout(0.1),
-        tf.keras.layers.Dense(256, activation=tf.nn.relu),
-        tf.keras.layers.Dropout(0.1),
-        tf.keras.layers.Dense(128, activation=tf.nn.relu),
-        tf.keras.layers.Dropout(0.1),
-        tf.keras.layers.Dense(1, activation='sigmoid'),
-    ]
-)
+print(train_x)
+print(train_x[0].shape)
+print(train_x[0][0].shape)
+
+
+
+model = tf.keras.models.Sequential()
+       
+model.add(tf.keras.layers.Dense(1000, activation=tf.nn.relu))
+model.add(tf.keras.layers.Dropout(0.1))
+model.add(tf.keras.layers.Dense(1000, activation=tf.nn.relu))
+model.add(tf.keras.layers.Dropout(0.1))
+model.add(tf.keras.layers.Dense(1000, activation=tf.nn.relu))
+model.add(tf.keras.layers.Dropout(0.1))
+model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+
+
 
 # optimizer = tf.keras.optimizers.RMSprop(0.0001)
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
-# loss_1 = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 model.compile(
-    loss = tf.keras.losses.BinaryCrossentropy(from_logits=False),
-    # loss="mean_squared_error",  # mean_squared_error or binary_crossentropy
+    loss="binary_crossentropy",  # mean_squared_error or binary_crossentropy
     optimizer=optimizer,
     metrics=["binary_accuracy"],
 )
