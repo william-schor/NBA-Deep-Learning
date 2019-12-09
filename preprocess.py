@@ -41,7 +41,7 @@ BOXSCORE_STAT_START = 8
 
 def win_loss_per_roster(list_game_ids, season_games):
     data = []
-
+   
     for game_id in list_game_ids:
         boxscore = file_dumps.read_json(f"games/{game_id}")
         game_info = season_games[game_id]
@@ -57,6 +57,7 @@ def win_loss_per_roster(list_game_ids, season_games):
         data.append(
             [game_id, home_team_players, away_team_players, game_info["home_team_wins"]]
         )
+       
 
     return data
 
@@ -310,6 +311,7 @@ def get_data(roster_file, matrix_file):
 
 def get_2d_data(wl_per_rosters, player_matrix):
     data = []
+    games = []
 
     for game in wl_per_rosters:
         # home roster
@@ -325,8 +327,9 @@ def get_2d_data(wl_per_rosters, player_matrix):
             row.append(np.zeros(23))
 
         data.append(np.array(row).flatten())
+        games.append(int(game[0]))
 
-    return np.array(data)
+    return np.array(data), games
 
 
 if __name__ == "__main__":

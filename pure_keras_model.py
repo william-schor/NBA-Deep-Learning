@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 import preprocess
+import lines
+import model_profit
 
 
 print("reading file...")
@@ -12,22 +14,29 @@ player_matrix2 = {}
 for key in pd:
     player_matrix2[int(key)] = pd[key]
 
-all_data = preprocess.get_2d_data(wlpr, player_matrix2)
+all_data, games = preprocess.get_2d_data(wlpr, player_matrix2)
 
+all_data = all_data[105:]
+games = np.array(games[105:])
+wlpr = wlpr[105:]
 
 indices = np.random.permutation(len(all_data))
 all_data = all_data[indices]
 wlpr = wlpr[indices]
+games = games[indices]
+
+
 
 # random sample of games, split into test and train set
 cut = int(len(all_data) * 0.8)
 
 train_x = all_data[:cut]
 train_y = np.array([1 if game[3] else 0 for game in wlpr[:cut]])
-
+train_game_ids = games[:cut]
 
 test_x = all_data[cut:]
 test_y = np.array([1 if game[3] else 0 for game in wlpr[cut:]])
+test_game_ids = games[cut:]
 
 
 model = tf.keras.models.Sequential(
@@ -64,5 +73,16 @@ model.summary()
 history = model.fit(x=train_x, y=train_y, epochs=75, shuffle=True)
 
 score = model.evaluate(test_x, test_y)
+print("eval score:", score)
 
-print(score)
+predictions = model.predict(test_x)
+
+all_moneylines = lines.build_line_dict()
+my_lines = lines.get_lines(all_moneylines, test_game_ids)
+
+model_profit.evaluate_model(predictions, test_y, my_lines)
+
+
+
+
+
