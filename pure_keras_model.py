@@ -49,8 +49,10 @@ model = tf.keras.models.Sequential(
 
 # optimizer = tf.keras.optimizers.RMSprop(0.0001)
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+# loss_1 = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 model.compile(
-    loss="mean_squared_error",  # mean_squared_error or binary_crossentropy
+    loss = tf.keras.losses.BinaryCrossentropy(from_logits=True),
+    # loss="mean_squared_error",  # mean_squared_error or binary_crossentropy
     optimizer=optimizer,
     metrics=["binary_accuracy"],
 )
