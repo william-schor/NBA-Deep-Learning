@@ -61,11 +61,11 @@ test_game_ids = games[cut:]
 #     ]
 # )
 
-print("before", train_x.shape)
-tf.expand_dims(train_x, 1)
-print("after", train_x.shape)
+# print("before", train_x.shape)
+# tf.expand_dims(train_x, axis=0)
+# print("after", train_x.shape)
 
-model, epochs_val, learning_rate = convolution_model.get_model(train_x.shape)
+model, epochs_val, learning_rate = rnn_model.get_model(train_x.shape)
 
 model.compile(
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False),
