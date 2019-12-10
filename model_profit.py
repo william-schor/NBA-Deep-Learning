@@ -62,8 +62,21 @@ def evaluate_model(predictions, outcomes, moneylines):
 
     print("Final Profit:", profit, "Total bet size:", bet)
     print(f"ROI as a percent: {(profit * 100) /bet}")
+<<<<<<< HEAD
+    
+    
+    # plt.plot(profits)
+    # plt.ylabel("Dollars ($)")
+    # plt.xlabel("Number of Games")
+    # plt.show()
+    
+    
+
+
+=======
 
     plt.plot(profits)
     plt.ylabel("Dollars ($)")
     plt.xlabel("Number of Games")
     plt.show()
+>>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
