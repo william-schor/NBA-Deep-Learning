@@ -67,7 +67,13 @@ def win_loss_per_roster(list_game_ids, season_games, season):
                 away_team_players.append(player_info[BOXSCORE_PLAYER_ID])
 
         data.append(
-            [game_id, home_team_players, away_team_players, game_info["home_team_wins"]]
+            [
+                game_id,
+                home_team_players,
+                away_team_players,
+                game_info["home_team_wins"],
+                game_info["home_team"],
+            ]
         )
 
     return data
@@ -344,6 +350,25 @@ def get_data(roster_file, matrix_file):
     return pd, nparr
 
 
+def get_rnn_data(wl_per_rosters, player_matrix):
+    teams_list = teams.get_teams()
+    team_index_map = {}
+
+    for index, team in enumerate(teams_list):
+        team_index_map[team["id"]] = index
+
+    final_data = [[] for _ in range(len(teams_list))]
+
+    data_2d, game_list = get_2d_data(wl_per_rosters, player_matrix)
+
+    home_teams = [game[4] for game in wl_per_rosters]
+    for data, team in zip(data_2d, home_teams):
+        index = team_index_map[team]
+        final_data[index].append(data)
+
+    return final_data, game_list
+
+
 def get_2d_data(wl_per_rosters, player_matrix):
     data = []
     games = []
@@ -398,10 +423,22 @@ def get_2d_data(wl_per_rosters, player_matrix):
 
 if __name__ == "__main__":
 
-    create_player_matrix_from_local("final_data/player_dict_2017.json", "2017")
-    print("1")
-    create_wl_per_roster_from_local("final_data/wl_per_rosters_2017.npy", "2017")
-    print("2")
-    create_player_matrix_from_local("final_data/player_dict_2018.json", "2018")
-    print("3")
-    create_wl_per_roster_from_local("final_data/wl_per_rosters_2018.npy", "2018")
+    # create_player_matrix_from_local("final_data/player_dict_2017.json", "2017")
+    # create_wl_per_roster_from_local("final_data/wl_per_rosters_2017.npy", "2017")
+    # create_player_matrix_from_local("final_data/player_dict_2018.json", "2018")
+    # create_wl_per_roster_from_local("final_data/wl_per_rosters_2018.npy", "2018")
+
+    pd2018, wlpr2018 = get_data(
+        "final_data/wl_per_rosters_2018.npy", "final_data/player_dict_2018.json"
+    )
+
+    conv_pd2018 = {}
+    for key in pd2018:
+        conv_pd2018[int(key)] = pd2018[key]
+
+    print("building data...")
+    data2018, games2018 = get_rnn_data(wlpr2018, conv_pd2018)
+
+    print(data2018)
+    print(len(data2018))
+    print(data2018[0])
