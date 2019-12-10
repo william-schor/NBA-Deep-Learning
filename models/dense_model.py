@@ -18,6 +18,8 @@ def get_model():
         ]
     )
 
+    epochs_val = 40
+
     learning_rate = 0.001
 
     return model, epochs_val, learning_rate
