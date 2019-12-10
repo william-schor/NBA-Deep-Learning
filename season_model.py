@@ -2,8 +2,7 @@ import tensorflow as tf
 import numpy as np
 import preprocess
 import lines
-
-# import model_profit
+import model_profit
 
 
 print("loading data...")
@@ -32,6 +31,7 @@ train_y = np.array([1 if game[3] else 0 for game in wlpr2017])
 
 test_x = data2018
 test_y = np.array([1 if game[3] else 0 for game in wlpr2018])
+test_game_ids = games2018
 ###############
 
 
@@ -65,16 +65,29 @@ model.build(train_x.shape)
 model.summary()
 
 
-history = model.fit(x=train_x, y=train_y, epochs=20, verbose=0, shuffle=True)
+history = model.fit(x=train_x, y=train_y, epochs=20, shuffle=True)
 
-score = model.evaluate(test_x, test_y)
+
+score = model.evaluate(test_x, test_y, verbose=0)
 print("eval score:", score)
 
+
+predictions = model.predict(test_x)
+
+correct = 0
+for pred, val in zip(predictions, test_y):
+    if pred <= 0.5:
+        if val == 0:
+            correct += 1
+    if pred > 0.5:
+        if val == 1:
+            correct += 1
+
+print("My score:", correct / len(predictions))
 print("---------------------------------------------------------")
 
-# predictions = model.predict(test_x)
 
-# all_moneylines = lines.build_line_dict("betting/nba_money_lines2018.csv")
-# my_lines = lines.get_lines(all_moneylines, test_game_ids)
+all_moneylines = lines.get_line_dict("2018")
+my_lines = lines.get_lines(all_moneylines, test_game_ids)
 
-# model_profit.evaluate_model(predictions, test_y, my_lines)
+model_profit.evaluate_model(predictions, test_y, my_lines)

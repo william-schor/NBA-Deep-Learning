@@ -61,7 +61,7 @@ print("eval score:", score)
 
 predictions = model.predict(test_x)
 
-all_moneylines = lines.build_line_dict()
+all_moneylines = lines.get_line_dict()
 my_lines = lines.get_lines(all_moneylines, test_game_ids)
 
 model_profit.evaluate_model(predictions, test_y, my_lines)
