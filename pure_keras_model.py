@@ -10,7 +10,6 @@ from models import rnn_model
 import argparse
 
 
-
 print("reading file...")
 pd, wlpr = preprocess.get_data(
     "final_data/wl_per_rosters_2.npy", "final_data/player_dict_2.json"
@@ -32,7 +31,6 @@ wlpr = wlpr[indices]
 games = games[indices]
 
 
-
 # random sample of games, split into test and train set
 cut = int(len(all_data) * 0.8)
 
@@ -45,6 +43,7 @@ test_y = np.array([1 if game[3] else 0 for game in wlpr[cut:]])
 test_game_ids = games[cut:]
 
 
+<<<<<<< HEAD
 # model = tf.keras.models.Sequential(
 #     [
 #         # tf.keras.layers.Flatten(input_shape=train_x[0].shape),
@@ -67,16 +66,18 @@ tf.expand_dims(train_x, 1)
 print("after", train_x.shape)
 
 model, epochs_val, learning_rate = dense_model.get_model()
+=======
+model, epochs_val, learning_rate = rnn_model.get_model(train_x.shape)
+>>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
 
 model.compile(
-    loss = tf.keras.losses.BinaryCrossentropy(from_logits=False),
+    loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
     optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
     metrics=["binary_accuracy"],
 )
 
 model.build(train_x.shape)
 model.summary()
-
 
 
 history = model.fit(x=train_x, y=train_y, epochs=epochs_val, shuffle=True)
@@ -86,10 +87,11 @@ print("eval score:", score)
 
 predictions = model.predict(test_x)
 
-all_moneylines = lines.build_line_dict()
+all_moneylines = lines.get_line_dict()
 my_lines = lines.get_lines(all_moneylines, test_game_ids)
 
 model_profit.evaluate_model(predictions, test_y, my_lines)
+<<<<<<< HEAD
 
 today_data = fetch.get_today_input_data()
 predictions = model.predict(today_data)
@@ -100,3 +102,5 @@ predictions = model.predict(today_data)
 
 
 
+=======
+>>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7

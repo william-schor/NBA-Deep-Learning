@@ -24,7 +24,7 @@ from nba_api.stats.static import teams
 from nba_api.stats.static import players
 
 
-SEASON = "2017-18"
+SEASON = "2018-19"
 SEASON_TYPE = "Regular Season"
 
 NUM_GAMES = 1230  # 82*30/2
@@ -39,11 +39,27 @@ BOXSCORE_PLAYER_ID = 4
 BOXSCORE_STAT_START = 8
 
 
-def win_loss_per_roster(list_game_ids, season_games):
+def win_loss_per_roster(list_game_ids, season_games, season):
     data = []
-   
+
+    path = ""
+    if season == "2017":
+        path = "games2017"
+    elif season == "2018":
+        path = "games2018"
+    else:
+        print(season)
+        print(season == "2017")
+        print(season == "2018")
+        print("SEASON NOT AVAILABLE")
+        sys.exit(0)
+
     for game_id in list_game_ids:
+<<<<<<< HEAD
         boxscore = file_dumps.read_json("games/" + str(game_id))
+=======
+        boxscore = file_dumps.read_json(f"{path}/{game_id}")
+>>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
         game_info = season_games[game_id]
         home_team_players = []
         away_team_players = []
@@ -57,7 +73,6 @@ def win_loss_per_roster(list_game_ids, season_games):
         data.append(
             [game_id, home_team_players, away_team_players, game_info["home_team_wins"]]
         )
-       
 
     return data
 
@@ -68,15 +83,6 @@ def fill_player_dict(all_games):
         player_dict[player["id"]] = dict.fromkeys([game[1] for game in all_games])
         for game in all_games:
             player_dict[player["id"]][game[1]] = None
-
-    # Edge case for incomplete api
-    player_dict[1628454] = dict.fromkeys([game[1] for game in all_games])
-    for game in all_games:
-        player_dict[1628454][game[1]] = None
-
-    player_dict[1628473] = dict.fromkeys([game[1] for game in all_games])
-    for game in all_games:
-        player_dict[1628473][game[1]] = None
 
     return player_dict
 
@@ -195,11 +201,23 @@ def remove_away_teams(games):
     return res
 
 
-def create_wl_per_roster_from_local(filename):
-    _, ag = get_games_local()
+def create_wl_per_roster_from_local(outfile, season_str):
+    _, ag = get_games_local(season_str)
     print("loaded games...")
 
-    season = file_dumps.read_json("schedule/nba2017_18")
+    schedule_path = ""
+    if season_str == "2017":
+        schedule_path = "schedule/nba2017_18"
+    elif season_str == "2018":
+        schedule_path = "schedule/nba2018_19"
+    else:
+        print(season_str)
+        print(season_str == "2017")
+        print(season_str == "2018")
+        print("SEASON NOT AVAILABLE")
+        sys.exit(0)
+
+    season = file_dumps.read_json(schedule_path)
     rows = season["resultSets"][0]["rowSet"]
     rows.sort(key=lambda x: x[4])
     ag = list(ag)
@@ -214,19 +232,44 @@ def create_wl_per_roster_from_local(filename):
         season_games[game_id[1]]["home_team_wins"] = True if row[7] == "W" else False
     print("loaded season...")
 
-    wlpr = win_loss_per_roster([x[1] for x in ag], season_games)
+    wlpr = win_loss_per_roster([x[1] for x in ag], season_games, season_str)
     wlpr = np.array(wlpr)
-    file_dumps.write_np_arr(wlpr, filename)
+    file_dumps.write_np_arr(wlpr, outfile)
 
 
-def get_games_local():
-    ag = file_dumps.read_numpy_arr("games/all_games.npy")
-    tg = file_dumps.read_numpy_arr("games/team_games.npy")
+def get_games_local(season):
+    if season == "2017":
+        ag_path = "games2017/all_games.npy"
+        tg_path = "games2017/team_games.npy"
+    elif season == "2018":
+        ag_path = "games2018/all_games.npy"
+        tg_path = "games2018/team_games.npy"
+    else:
+        print(season)
+        print(season == "2017")
+        print(season == "2018")
+        print("SEASON NOT AVAILABLE")
+        sys.exit(0)
+    ag = file_dumps.read_numpy_arr(ag_path)
+    tg = file_dumps.read_numpy_arr(tg_path)
+
     return tg, ag
 
 
-def create_player_matrix_from_local(filename):
-    team_games, all_games = get_games_local()
+def create_player_matrix_from_local(filename, season):
+    path = ""
+    if season == "2017":
+        path = "games2017"
+    elif season == "2018":
+        path = "games2018"
+    else:
+        print(season)
+        print(season == "2017")
+        print(season == "2018")
+        print("SEASON NOT AVAILABLE")
+        sys.exit(0)
+
+    team_games, all_games = get_games_local(season)
 
     players_dict = fill_player_dict(all_games)
 
@@ -250,11 +293,15 @@ def create_player_matrix_from_local(filename):
         i = 0
         for game_id in game_set:
             i += 1
+<<<<<<< HEAD
             boxscore = file_dumps.read_json("games/" + str(game_id))
 
             # print(f'writing temp file for game: {game_id}')
             # with open(f'games/{game_id}', "w") as file:
             #     file.write(json.dumps(boxscore))
+=======
+            boxscore = file_dumps.read_json(f"{path}/{game_id}")
+>>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
 
             for player_line in boxscore:
                 if player_line[BOXSCORE_TEAM_ID] == team_id:
@@ -266,7 +313,7 @@ def create_player_matrix_from_local(filename):
                         player_line[BOXSCORE_STAT_START].split(":")[0]
                     ) * 60 + int(player_line[BOXSCORE_STAT_START].split(":")[1])
                     players_dict[player_line[BOXSCORE_PLAYER_ID]][game_id] = np.array(
-                        player_line[BOXSCORE_STAT_START:]
+                        player_line[BOXSCORE_STAT_START:], dtype="float32"
                     )
     print("-------------------------------------------")
     print("Filling in time step blanks...")
@@ -295,7 +342,7 @@ def create_player_matrix_from_local(filename):
     for player in players_dict:
         for game in players_dict[player]:
             if players_dict[player][game] is None:
-                players_dict[player][game] = np.zeros(23)
+                players_dict[player][game] = np.zeros(23, dtype="float32")
     # The final dictionary is: (num_players, num_games, num_stats)
     # each player id and game id is a key. The stats are stored in a numpy array
     print("-------------------------------------------")
@@ -316,38 +363,65 @@ def get_2d_data(wl_per_rosters, player_matrix):
     for game in wl_per_rosters:
         # home roster
         row = []
-        for player in game[1]:
-            stats = player_matrix[player][game[0]]
-            row.append(stats)
-        for player in game[2]:
-            stats = player_matrix[player][game[0]]
-            row.append(stats)
+        limit = min(len(game[1]), 13)
+        for player in game[1][:limit]:
+            if player not in player_matrix:
+                if players.find_player_by_id(player) is not None:
+                    print("ERROR has occured!!")
+                    sys.exit(1)
+            else:
+                stats = np.array(player_matrix[player][game[0]], dtype="float32")
+                row.append(stats)
+
+        while len(row) < 13:
+            row.append(np.zeros(23, dtype="float32"))
+
+        limit = min(len(game[1]), 13)
+        for player in game[2][:limit]:
+            if player not in player_matrix:
+                if players.find_player_by_id(player) is not None:
+                    print("ERROR has occured!!")
+                    sys.exit(1)
+                else:
+                    print("This player is not in the NBA apparently!")
+            else:
+                stats = np.array(player_matrix[player][game[0]], dtype="float32")
+                row.append(stats)
 
         while len(row) < 26:
-            row.append(np.zeros(23))
+            row.append(np.zeros(23, dtype="float32"))
 
-        data.append(np.array(row).flatten())
+        row = np.array(row, dtype="float32").flatten()
+
+        if row.shape != (598,):
+            print("RED ALERT!")
+            print(game)
+            print(stats)
+            sys.exit(1)
+
+        data.append(row)
         games.append(int(game[0]))
 
-    return np.array(data), games
-
-
+<<<<<<< HEAD
 if __name__ == "__main__":
     create_wl_per_roster_from_local("final_data/wl_per_rosters_2.npy")
     create_player_matrix_from_local("final_data/player_dict_2.json")
 
 
+=======
+    data = np.array(data)
+    games = np.array(games)
+>>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
 
-    pd, wlpr = get_data(
-        "final_data/wl_per_rosters_2.npy", "final_data/player_dict_2.json"
-    )
+    return data, games
 
-    player_matrix2 = {}
-    for key in pd:
-        player_matrix2[int(key)] = pd[key]
 
-    data = get_2d_data(wlpr, player_matrix2)
+if __name__ == "__main__":
 
-    print(len(data))
-    print(len(data[0]))
-    print(data)
+    create_player_matrix_from_local("final_data/player_dict_2017.json", "2017")
+    print("1")
+    create_wl_per_roster_from_local("final_data/wl_per_rosters_2017.npy", "2017")
+    print("2")
+    create_player_matrix_from_local("final_data/player_dict_2018.json", "2018")
+    print("3")
+    create_wl_per_roster_from_local("final_data/wl_per_rosters_2018.npy", "2018")
