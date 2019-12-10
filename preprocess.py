@@ -55,11 +55,7 @@ def win_loss_per_roster(list_game_ids, season_games, season):
         sys.exit(0)
 
     for game_id in list_game_ids:
-<<<<<<< HEAD
-        boxscore = file_dumps.read_json("games/" + str(game_id))
-=======
         boxscore = file_dumps.read_json(f"{path}/{game_id}")
->>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
         game_info = season_games[game_id]
         home_team_players = []
         away_team_players = []
@@ -139,7 +135,9 @@ def create_player_matrix_from_api(team_ids):
     for game_info in team_games:
         team_id = game_info[0]
         print(
-            "Running calculations for " + str({teams.find_team_name_by_id(team_id)['full_name']}) + "..."
+            "Running calculations for "
+            + str({teams.find_team_name_by_id(team_id)["full_name"]})
+            + "..."
         )
         game_set = game_info[1]
         i = 0
@@ -293,21 +291,16 @@ def create_player_matrix_from_local(filename, season):
     for game_info in team_games:
         team_id = game_info[0]
         print(
-            "Running calculations for " + str({teams.find_team_name_by_id(team_id)['full_name']}) + "..."
+            "Running calculations for "
+            + str({teams.find_team_name_by_id(team_id)["full_name"]})
+            + "..."
         )
         game_set = game_info[1]
         i = 0
         for game_id in game_set:
             i += 1
-<<<<<<< HEAD
-            boxscore = file_dumps.read_json("games/" + str(game_id))
 
-            # print(f'writing temp file for game: {game_id}')
-            # with open(f'games/{game_id}', "w") as file:
-            #     file.write(json.dumps(boxscore))
-=======
             boxscore = file_dumps.read_json(f"{path}/{game_id}")
->>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
 
             for player_line in boxscore:
                 if player_line[BOXSCORE_TEAM_ID] == team_id:
@@ -426,17 +419,6 @@ def get_2d_data(wl_per_rosters, player_matrix):
 
         data.append(row)
         games.append(int(game[0]))
-
-<<<<<<< HEAD
-if __name__ == "__main__":
-    create_wl_per_roster_from_local("final_data/wl_per_rosters_2.npy")
-    create_player_matrix_from_local("final_data/player_dict_2.json")
-
-
-=======
-    data = np.array(data)
-    games = np.array(games)
->>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
 
     return data, games
 
