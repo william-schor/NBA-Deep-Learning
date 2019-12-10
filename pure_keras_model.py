@@ -3,6 +3,7 @@ import numpy as np
 import preprocess
 import lines
 import model_profit
+import fetch
 from models import convolution_model
 from models import dense_model
 from models import rnn_model
@@ -42,7 +43,7 @@ test_y = np.array([1 if game[3] else 0 for game in wlpr[cut:]])
 test_game_ids = games[cut:]
 
 
-model, epochs_val, learning_rate = rnn_model.get_model(train_x.shape)
+model, epochs_val, learning_rate = dense_model.get_model()
 
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
@@ -65,3 +66,8 @@ all_moneylines = lines.get_line_dict()
 my_lines = lines.get_lines(all_moneylines, test_game_ids)
 
 model_profit.evaluate_model(predictions, test_y, my_lines)
+
+today_data = fetch.get_today_input_data()
+predictions = model.predict(today_data)
+
+# model_profit.evaluate_model(predictions, [0, 1, 0, 0, 1, 0, 1, 0, 0], [-140, -1177, 211, -105, -791, -958, -144, -370, -145])

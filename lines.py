@@ -6,6 +6,7 @@ from nba_api.stats.static import teams
 
 FILENAME_2017 = "betting/nba_money_lines2017.csv"
 FILENAME_2018 = "betting/nba_money_lines2018.csv"
+ADJUSTER = 0.3
 
 
 def build_2017_line_dict():
@@ -18,7 +19,7 @@ def build_2017_line_dict():
             if int(row[0]) != seq:
                 print(f"Game id: {int(row[0]) - 1} is missing")
                 seq += 1
-            line_dict[int(row[0])] = int(row[5])
+            line_dict[int(row[0])] = (int(row[4]), int(row[5]))
             seq += 1
     return line_dict
 
@@ -82,7 +83,7 @@ def build_2018_line_dict():
                     break
     line_dict = {}
     for game in final_game_list:
-        line_dict[int(game[0])] = int(game[4])
+        line_dict[int(game[0])] = (int(game[3]), int(game[4]))
     return line_dict
 
 
@@ -101,6 +102,10 @@ def resolve_ambiguous_name(name):
         return "LAL"
     if name == "NewOrleans":
         return "NOP"
+
+
+def calc(score):
+    return score - ADJUSTER
 
 
 def get_lines(line_dict, games):

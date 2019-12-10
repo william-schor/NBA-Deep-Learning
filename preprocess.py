@@ -67,7 +67,13 @@ def win_loss_per_roster(list_game_ids, season_games, season):
                 away_team_players.append(player_info[BOXSCORE_PLAYER_ID])
 
         data.append(
-            [game_id, home_team_players, away_team_players, game_info["home_team_wins"]]
+            [
+                game_id,
+                home_team_players,
+                away_team_players,
+                game_info["home_team_wins"],
+                game_info["home_team"],
+            ]
         )
 
     return data
@@ -103,7 +109,7 @@ def get_games_api(team_ids):
         # Reverse the game id list!
         team_games.append((tid, game_ids[::-1]))
         name = teams.find_team_name_by_id(tid)["full_name"]
-        print(f"{name} done...")
+        print(name + " done...")
 
     # deduplicate games
     all_games = OrderedDict((x, True) for x in all_games).keys()
@@ -129,19 +135,21 @@ def create_player_matrix_from_api(team_ids):
     for game_info in team_games:
         team_id = game_info[0]
         print(
-            f"Running calculations for {teams.find_team_name_by_id(team_id)['full_name']}..."
+            "Running calculations for "
+            + str({teams.find_team_name_by_id(team_id)["full_name"]})
+            + "..."
         )
         game_set = game_info[1]
         i = 0
         for game_id in game_set:
-            print(f"{i} games done")
+            print(str(i) + " games done")
             i += 1
             boxscore = boxscoreadvancedv2.BoxScoreAdvancedV2(
                 game_id=game_id
             ).get_dict()["resultSets"][0]["rowSet"]
 
-            print(f"writing temp file for game: {game_id}")
-            with open(f"games/{game_id}", "w") as file:
+            print("writing temp file for game: " + str(game_id))
+            with open("games/{" + str(game_id), "w") as file:
                 file.write(json.dumps(boxscore))
 
             for player_line in boxscore:
@@ -283,12 +291,15 @@ def create_player_matrix_from_local(filename, season):
     for game_info in team_games:
         team_id = game_info[0]
         print(
-            f"Running calculations for {teams.find_team_name_by_id(team_id)['full_name']}..."
+            "Running calculations for "
+            + str({teams.find_team_name_by_id(team_id)["full_name"]})
+            + "..."
         )
         game_set = game_info[1]
         i = 0
         for game_id in game_set:
             i += 1
+
             boxscore = file_dumps.read_json(f"{path}/{game_id}")
 
             for player_line in boxscore:
@@ -344,6 +355,25 @@ def get_data(roster_file, matrix_file):
     return pd, nparr
 
 
+def get_rnn_data(wl_per_rosters, player_matrix):
+    teams_list = teams.get_teams()
+    team_index_map = {}
+
+    for index, team in enumerate(teams_list):
+        team_index_map[team["id"]] = index
+
+    final_data = [[] for _ in range(len(teams_list))]
+
+    data_2d, game_list = get_2d_data(wl_per_rosters, player_matrix)
+
+    home_teams = [game[4] for game in wl_per_rosters]
+    for data, team in zip(data_2d, home_teams):
+        index = team_index_map[team]
+        final_data[index].append(data)
+
+    return final_data, game_list
+
+
 def get_2d_data(wl_per_rosters, player_matrix):
     data = []
     games = []
@@ -390,18 +420,27 @@ def get_2d_data(wl_per_rosters, player_matrix):
         data.append(row)
         games.append(int(game[0]))
 
-    data = np.array(data)
-    games = np.array(games)
-
-    return data, games
+    return np.array(data), np.array(games)
 
 
 if __name__ == "__main__":
 
-    create_player_matrix_from_local("final_data/player_dict_2017.json", "2017")
-    print("1")
-    create_wl_per_roster_from_local("final_data/wl_per_rosters_2017.npy", "2017")
-    print("2")
-    create_player_matrix_from_local("final_data/player_dict_2018.json", "2018")
-    print("3")
-    create_wl_per_roster_from_local("final_data/wl_per_rosters_2018.npy", "2018")
+    # create_player_matrix_from_local("final_data/player_dict_2017.json", "2017")
+    # create_wl_per_roster_from_local("final_data/wl_per_rosters_2017.npy", "2017")
+    # create_player_matrix_from_local("final_data/player_dict_2018.json", "2018")
+    # create_wl_per_roster_from_local("final_data/wl_per_rosters_2018.npy", "2018")
+
+    pd2018, wlpr2018 = get_data(
+        "final_data/wl_per_rosters_2018.npy", "final_data/player_dict_2018.json"
+    )
+
+    conv_pd2018 = {}
+    for key in pd2018:
+        conv_pd2018[int(key)] = pd2018[key]
+
+    print("building data...")
+    data2018, games2018 = get_rnn_data(wlpr2018, conv_pd2018)
+
+    print(data2018)
+    print(len(data2018))
+    print(data2018[0])
