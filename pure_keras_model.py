@@ -43,32 +43,7 @@ test_y = np.array([1 if game[3] else 0 for game in wlpr[cut:]])
 test_game_ids = games[cut:]
 
 
-<<<<<<< HEAD
-# model = tf.keras.models.Sequential(
-#     [
-#         # tf.keras.layers.Flatten(input_shape=train_x[0].shape),
-#         tf.keras.layers.Dense(4096, activation=tf.nn.relu),
-#         tf.keras.layers.Dropout(0.1),
-#         tf.keras.layers.Dense(2048, activation=tf.nn.relu),
-#         tf.keras.layers.Dropout(0.1),
-#         tf.keras.layers.Dense(512, activation=tf.nn.relu),
-#         tf.keras.layers.Dropout(0.1),
-#         tf.keras.layers.Dense(256, activation=tf.nn.relu),
-#         tf.keras.layers.Dropout(0.1),
-#         tf.keras.layers.Dense(128, activation=tf.nn.relu),
-#         tf.keras.layers.Dropout(0.1),
-#         tf.keras.layers.Dense(1, activation='sigmoid'),
-#     ]
-# )
-
-print("before", train_x.shape)
-tf.expand_dims(train_x, 1)
-print("after", train_x.shape)
-
 model, epochs_val, learning_rate = dense_model.get_model()
-=======
-model, epochs_val, learning_rate = rnn_model.get_model(train_x.shape)
->>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
 
 model.compile(
     loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
@@ -91,16 +66,8 @@ all_moneylines = lines.get_line_dict()
 my_lines = lines.get_lines(all_moneylines, test_game_ids)
 
 model_profit.evaluate_model(predictions, test_y, my_lines)
-<<<<<<< HEAD
 
 today_data = fetch.get_today_input_data()
 predictions = model.predict(today_data)
 
 # model_profit.evaluate_model(predictions, [0, 1, 0, 0, 1, 0, 1, 0, 0], [-140, -1177, 211, -105, -791, -958, -144, -370, -145])
-
-
-
-
-
-=======
->>>>>>> 8a0abd5929a6aec9bdef7ba872b7e5c6035206b7
