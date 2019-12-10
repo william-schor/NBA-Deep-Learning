@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 def profit_function(pred, outcome, moneyline):
-    BETSIZE = 100
+    BETSIZE = 1000
     odds = implied_odds(moneyline)
     profit = 0
 
@@ -52,18 +52,21 @@ def evaluate_model(predictions, outcomes, moneylines):
     bet = 0
     for prediction, outcome, moneyline in zip(predictions, outcomes, moneylines):
         p, b = profit_function(prediction, outcome, moneyline)
-        print("p", p)
-        print("b", b)
-        profit += p
-        bet += b
+        print("bet", b, " |||   profit", p)
+        
+        profit += p[0]
+        bet += b[0]
         profits.append(profit)
 
     print("Final Profit:", profit, "Total bet size:", bet)
-    print(f"ROI as a percent: {(profits * 100) /bet}")
-    print(profits)
+    print(f"ROI as a percent: {(profit * 100) /bet}")
+    
+    
     plt.plot(profits)
+    plt.ylabel("Dollars ($)")
+    plt.xlabel("Number of Games")
     plt.show()
-    print("Final Profit:", profit, "Total bet size:", bet)
+    
     
 
 
