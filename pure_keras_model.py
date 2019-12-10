@@ -3,6 +3,7 @@ import numpy as np
 import preprocess
 import lines
 import model_profit
+import fetch
 from models import convolution_model
 from models import dense_model
 from models import rnn_model
@@ -65,7 +66,7 @@ print("before", train_x.shape)
 tf.expand_dims(train_x, 1)
 print("after", train_x.shape)
 
-model, epochs_val, learning_rate = convolution_model.get_model(train_x.shape)
+model, epochs_val, learning_rate = dense_model.get_model()
 
 model.compile(
     loss = tf.keras.losses.BinaryCrossentropy(from_logits=False),
@@ -89,6 +90,11 @@ all_moneylines = lines.build_line_dict()
 my_lines = lines.get_lines(all_moneylines, test_game_ids)
 
 model_profit.evaluate_model(predictions, test_y, my_lines)
+
+today_data = fetch.get_today_input_data()
+predictions = model.predict(today_data)
+
+# model_profit.evaluate_model(predictions, [0, 1, 0, 0, 1, 0, 1, 0, 0], [-140, -1177, 211, -105, -791, -958, -144, -370, -145])
 
 
 

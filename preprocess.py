@@ -43,7 +43,7 @@ def win_loss_per_roster(list_game_ids, season_games):
     data = []
    
     for game_id in list_game_ids:
-        boxscore = file_dumps.read_json(f"games/{game_id}")
+        boxscore = file_dumps.read_json("games/" + str(game_id))
         game_info = season_games[game_id]
         home_team_players = []
         away_team_players = []
@@ -101,7 +101,7 @@ def get_games_api(team_ids):
         # Reverse the game id list!
         team_games.append((tid, game_ids[::-1]))
         name = teams.find_team_name_by_id(tid)["full_name"]
-        print(f"{name} done...")
+        print(name + " done...")
 
     # deduplicate games
     all_games = OrderedDict((x, True) for x in all_games).keys()
@@ -127,19 +127,19 @@ def create_player_matrix_from_api(team_ids):
     for game_info in team_games:
         team_id = game_info[0]
         print(
-            f"Running calculations for {teams.find_team_name_by_id(team_id)['full_name']}..."
+            "Running calculations for " + str({teams.find_team_name_by_id(team_id)['full_name']}) + "..."
         )
         game_set = game_info[1]
         i = 0
         for game_id in game_set:
-            print(f"{i} games done")
+            print(str(i) + " games done")
             i += 1
             boxscore = boxscoreadvancedv2.BoxScoreAdvancedV2(
                 game_id=game_id
             ).get_dict()["resultSets"][0]["rowSet"]
 
-            print(f"writing temp file for game: {game_id}")
-            with open(f"games/{game_id}", "w") as file:
+            print("writing temp file for game: " + str(game_id))
+            with open("games/{" + str(game_id), "w") as file:
                 file.write(json.dumps(boxscore))
 
             for player_line in boxscore:
@@ -244,13 +244,13 @@ def create_player_matrix_from_local(filename):
     for game_info in team_games:
         team_id = game_info[0]
         print(
-            f"Running calculations for {teams.find_team_name_by_id(team_id)['full_name']}..."
+            "Running calculations for " + str({teams.find_team_name_by_id(team_id)['full_name']}) + "..."
         )
         game_set = game_info[1]
         i = 0
         for game_id in game_set:
             i += 1
-            boxscore = file_dumps.read_json(f"games/{game_id}")
+            boxscore = file_dumps.read_json("games/" + str(game_id))
 
             # print(f'writing temp file for game: {game_id}')
             # with open(f'games/{game_id}', "w") as file:
@@ -333,8 +333,10 @@ def get_2d_data(wl_per_rosters, player_matrix):
 
 
 if __name__ == "__main__":
-    # create_wl_per_roster_from_local("final_data/wl_per_rosters_2.npy")
-    # create_player_matrix_from_local("final_data/player_dict_2.json")
+    create_wl_per_roster_from_local("final_data/wl_per_rosters_2.npy")
+    create_player_matrix_from_local("final_data/player_dict_2.json")
+
+
 
     pd, wlpr = get_data(
         "final_data/wl_per_rosters_2.npy", "final_data/player_dict_2.json"
