@@ -1,12 +1,12 @@
 import csv
 import sys
 
-FILENAME = "betting/nba_money_lines.csv"
+FILENAME = "betting/nba_money_lines2017.csv"
 
 
-def build_line_dict():
+def build_line_dict(filename=FILENAME):
     line_dict = {}
-    with open(FILENAME, "r") as csvfile:
+    with open(filename, "r") as csvfile:
         readCSV = csv.reader(csvfile, delimiter=",")
         next(readCSV, None)
         seq = 21700105

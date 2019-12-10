@@ -7,7 +7,7 @@ import model_profit
 
 print("reading file...")
 pd, wlpr = preprocess.get_data(
-    "final_data/wl_per_rosters_2.npy", "final_data/player_dict_2.json"
+    "final_data/wl_per_rosters_old.npy", "final_data/player_dict_old.json"
 )
 
 player_matrix2 = {}
@@ -24,7 +24,6 @@ indices = np.random.permutation(len(all_data))
 all_data = all_data[indices]
 wlpr = wlpr[indices]
 games = games[indices]
-
 
 
 # random sample of games, split into test and train set
@@ -52,7 +51,7 @@ model = tf.keras.models.Sequential(
         tf.keras.layers.Dropout(0.1),
         tf.keras.layers.Dense(128, activation=tf.nn.relu),
         tf.keras.layers.Dropout(0.1),
-        tf.keras.layers.Dense(1, activation='sigmoid'),
+        tf.keras.layers.Dense(1, activation="sigmoid"),
     ]
 )
 
@@ -60,7 +59,7 @@ model = tf.keras.models.Sequential(
 optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
 # loss_1 = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 model.compile(
-    loss = tf.keras.losses.BinaryCrossentropy(from_logits=False),
+    loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
     # loss="mean_squared_error",  # mean_squared_error or binary_crossentropy
     optimizer=optimizer,
     metrics=["binary_accuracy"],
@@ -81,8 +80,3 @@ all_moneylines = lines.build_line_dict()
 my_lines = lines.get_lines(all_moneylines, test_game_ids)
 
 model_profit.evaluate_model(predictions, test_y, my_lines)
-
-
-
-
-
