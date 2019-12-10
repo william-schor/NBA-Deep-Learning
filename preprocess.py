@@ -420,7 +420,7 @@ def get_2d_data(wl_per_rosters, player_matrix):
         data.append(row)
         games.append(int(game[0]))
 
-    return data, games
+    return np.array(data), np.array(games)
 
 
 if __name__ == "__main__":
