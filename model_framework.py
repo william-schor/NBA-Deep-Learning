@@ -26,17 +26,19 @@ data2017, games2017 = preprocess.get_2d_data(wlpr2017, conv_pd2017)
 data2018, games2018 = preprocess.get_2d_data(wlpr2018, conv_pd2018)
 
 
-train_x = data2017
-train_y = np.array([1 if game[3] else 0 for game in wlpr2017])
+train_x = data2017[:-1]
+train_y = np.array([1 if game[3] else 0 for game in wlpr2017[1:]])
 
-test_x = data2018
-test_y = np.array([1 if game[3] else 0 for game in wlpr2018])
+test_x = data2018[:-1]
+test_y = np.array([1 if game[3] else 0 for game in wlpr2018[1:]])
 test_game_ids = games2018
 
+
 ###############
+from models import dense_model
 from models import convolution_model
 
-model, epochs_val, learning_rate = convolution_model.get_model()
+model, epochs_val, learning_rate = dense_model.get_model()
 ###############
 
 
@@ -59,9 +61,6 @@ print("eval score:", score)
 
 predictions = model.predict(test_x)
 
-
-for pred, real, game in zip(predictions, test_y, test_game_ids):
-    print(pred, real, game)
 
 all_moneylines = lines.get_line_dict("2018")
 my_lines = lines.get_lines(all_moneylines, test_game_ids)

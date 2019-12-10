@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 
 
-def profit_function(pred, outcome, moneyline, total_money):
+def profit_function(pred, outcome, moneyline):
     away_line, home_line = moneyline
 
-    BETSIZE = total_money / 5
+    BETSIZE = 100
 
     home_odds = implied_odds(home_line)
     away_odds = implied_odds(away_line)
@@ -60,22 +60,15 @@ def evaluate_model(predictions, outcomes, moneylines):
     profits = []
     profit = 0
     bet = 0
-    total_money = 100
     for prediction, outcome, moneyline in zip(predictions, outcomes, moneylines):
-        p, b = profit_function(prediction, outcome, moneyline, total_money)
-        print("bet", str(b[0])[:4], " |||  profit", str(p[0])[:5])
+        p, b = profit_function(prediction, outcome, moneyline)
 
         profit += p[0]
         bet += b[0]
         profits.append(profit)
 
-        if p[0] > 0:
-            total_money += 0.8 * p[0]
-        else:
-            total_money += p[0]
-
     print("Final Profit:", profit, "Total bet size:", bet)
-    print(f"ROI as a percent: {(profit * 100) /bet}")
+    print(f"ROI as a percent: {(profit * 100)/bet}")
 
     # plt.plot(profits)
     # plt.ylabel("Dollars ($)")

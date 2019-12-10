@@ -5,6 +5,7 @@
 
 Downloads are slow. You should use pre-downloaded data if possible
 
+RUNNING THIS FILE WILL COMPILE ALL DATA!
 """
 
 import os
@@ -377,7 +378,6 @@ def get_rnn_data(wl_per_rosters, player_matrix):
 def get_2d_data(wl_per_rosters, player_matrix):
     data = []
     games = []
-
     for game in wl_per_rosters:
         # home roster
         row = []
@@ -401,7 +401,7 @@ def get_2d_data(wl_per_rosters, player_matrix):
                     print("ERROR has occured!!")
                     sys.exit(1)
                 else:
-                    print("This player is not in the NBA apparently!")
+                    print("Player id not in data. skipping...")
             else:
                 stats = np.array(player_matrix[player][game[0]], dtype="float32")
                 row.append(stats)
@@ -424,23 +424,7 @@ def get_2d_data(wl_per_rosters, player_matrix):
 
 
 if __name__ == "__main__":
-
-    # create_player_matrix_from_local("final_data/player_dict_2017.json", "2017")
-    # create_wl_per_roster_from_local("final_data/wl_per_rosters_2017.npy", "2017")
-    # create_player_matrix_from_local("final_data/player_dict_2018.json", "2018")
-    # create_wl_per_roster_from_local("final_data/wl_per_rosters_2018.npy", "2018")
-
-    pd2018, wlpr2018 = get_data(
-        "final_data/wl_per_rosters_2018.npy", "final_data/player_dict_2018.json"
-    )
-
-    conv_pd2018 = {}
-    for key in pd2018:
-        conv_pd2018[int(key)] = pd2018[key]
-
-    print("building data...")
-    data2018, games2018 = get_rnn_data(wlpr2018, conv_pd2018)
-
-    print(data2018)
-    print(len(data2018))
-    print(data2018[0])
+    create_player_matrix_from_local("final_data/player_dict_2017.json", "2017")
+    create_wl_per_roster_from_local("final_data/wl_per_rosters_2017.npy", "2017")
+    create_player_matrix_from_local("final_data/player_dict_2018.json", "2018")
+    create_wl_per_roster_from_local("final_data/wl_per_rosters_2018.npy", "2018")

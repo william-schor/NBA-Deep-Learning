@@ -7,9 +7,17 @@ def get_model():
         [
             tf.keras.layers.Reshape([598, 1, 1]),
             tf.keras.layers.Conv2D(
-                filters=5,
+                filters=10,
                 kernel_size=[23, 1],
                 strides=23,
+                padding="valid",
+                activation="relu",
+                use_bias=True,
+            ),
+            tf.keras.layers.Conv2D(
+                filters=3,
+                kernel_size=[13, 1],
+                strides=13,
                 padding="valid",
                 activation="relu",
                 use_bias=True,
@@ -24,7 +32,7 @@ def get_model():
             tf.keras.layers.Dense(1, activation="sigmoid"),
         ]
     )
-    epochs = 20
+    epochs = 40
     learning_rate = 0.001
 
     return model, epochs, learning_rate
