@@ -36,11 +36,11 @@ print("building data...")
 data2017, games2017 = preprocess.get_2d_data(wlpr2017, conv_pd2017)
 data2018, games2018 = preprocess.get_2d_data(wlpr2018, conv_pd2018)
 
-
-train_x = data2017[:-1]
+# Clip the first game of the season: No data = No prediction
+train_x = data2017
 train_y = np.array([1 if game[3] else 0 for game in wlpr2017[1:]])
 
-test_x = data2018[:-1]
+test_x = data2018
 test_y = np.array([1 if game[3] else 0 for game in wlpr2018[1:]])
 test_game_ids = games2018
 

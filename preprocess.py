@@ -346,7 +346,7 @@ def get_data(roster_file, matrix_file):
 def get_2d_data(wl_per_rosters, player_matrix):
     data = []
     games = []
-    for game in wl_per_rosters:
+    for game in wl_per_rosters[1:]:
         # home roster
         row = []
         limit = min(len(game[1]), 13)
@@ -356,7 +356,10 @@ def get_2d_data(wl_per_rosters, player_matrix):
                     print("ERROR has occured!!")
                     sys.exit(1)
             else:
-                stats = np.array(player_matrix[player][game[0]], dtype="float32")
+                # Subtract from game id in order to get previous game stats
+                stats = np.array(
+                    player_matrix[player][f"00{int(game[0]) - 1}"], dtype="float32"
+                )
                 row.append(stats)
 
         while len(row) < 13:
@@ -371,7 +374,10 @@ def get_2d_data(wl_per_rosters, player_matrix):
                 else:
                     print("Player id not in data. skipping...")
             else:
-                stats = np.array(player_matrix[player][game[0]], dtype="float32")
+                # Subtract from game id in order to get previous game stats
+                stats = np.array(
+                    player_matrix[player][f"00{int(game[0]) - 1}"], dtype="float32"
+                )
                 row.append(stats)
 
         while len(row) < 26:
