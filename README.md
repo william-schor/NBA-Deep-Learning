@@ -12,7 +12,7 @@ Note: You may need to make a folder called "final_data". While testing, we have 
 
 ## How to run the model
 
-Run `python model_framework.py --[model option]` will run the model. 
+Run `python model_framework.py --[model option]` to run the model. 
 
 * The flag `--dense` uses the dense model.
 * The flag `--team_conv` uses the team level convolution model
