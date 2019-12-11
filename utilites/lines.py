@@ -1,14 +1,13 @@
 import csv
 import sys
-import file_dumps
+from . import file_dumps
 from nba_api.stats.static import teams
 
 
 FILENAME_2017 = "betting/nba_money_lines2017.csv"
 FILENAME_2018 = "betting/nba_money_lines2018.csv"
-ADJUSTER = 0.3
 
-
+# Read the csv in the 2017 format
 def build_2017_line_dict():
     line_dict = {}
     with open(FILENAME_2017, "r") as csvfile:
@@ -24,6 +23,7 @@ def build_2017_line_dict():
     return line_dict
 
 
+# Read the csv in the 2018 format
 def build_2018_line_dict():
     new_lines = []
     with open(FILENAME_2018, "r") as csvfile:
@@ -87,6 +87,7 @@ def build_2018_line_dict():
     return line_dict
 
 
+# Helper method to account for data from two sources
 def resolve_ambiguous_name(name):
     if name == "LAClippers":
         return "LAC"
@@ -104,14 +105,12 @@ def resolve_ambiguous_name(name):
         return "NOP"
 
 
-def calc(score):
-    return score - ADJUSTER
-
-
+# simple dictionary selector
 def get_lines(line_dict, games):
     return [line_dict[game] for game in games]
 
 
+# This is the function you should call from outside lines.py
 def get_line_dict(season):
     if season == "2017":
         return build_2017_line_dict()
@@ -119,5 +118,5 @@ def get_line_dict(season):
         return build_2018_line_dict()
 
 
-if __name__ == "__main__":
-    convert_verbose_csv("betting/nba_money_lines2018.csv")
+# if __name__ == '__main__':
+#     print(resolve_ambiguous_name("LAClippers"))

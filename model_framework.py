@@ -1,8 +1,8 @@
 import tensorflow as tf
 import numpy as np
 import preprocess
-import lines
-import model_profit
+from utilites import lines
+from utilites import model_profit
 
 
 print("loading data...")

@@ -13,7 +13,7 @@ import sys
 import bisect
 import json
 import numpy as np
-import file_dumps
+from utilites import file_dumps
 from datetime import datetime
 from collections import OrderedDict
 
@@ -24,9 +24,6 @@ from nba_api.stats.endpoints import teamgamelog
 from nba_api.stats.static import teams
 from nba_api.stats.static import players
 
-
-SEASON = "2018-19"
-SEASON_TYPE = "Regular Season"
 
 NUM_GAMES = 1230  # 82*30/2
 NUM_STATS = 23
@@ -39,10 +36,87 @@ BOXSCORE_TEAM_ID = 1
 BOXSCORE_PLAYER_ID = 4
 BOXSCORE_STAT_START = 8
 
+######################################################################
 
+SEASON = "2018-19"
+SEASON_TYPE = "Regular Season"
+
+# The enclosed methods are used to pull from the api. It takes ~2 hours
+# to run. Do so at your own risk! Alternatively, use the local game data
+# which is stored in games2017 and games2018. Toggle the above constants
+# to download new data.
+
+
+def get_games_api(team_ids):
+    print("Loading game lists...")
+    team_games = []
+    all_games = []
+    for tid in team_ids:
+        team_log = teamgamelog.TeamGameLog(
+            season=SEASON, season_type_all_star=SEASON_TYPE, team_id=tid
+        ).get_dict()
+        results = team_log["resultSets"][0]["rowSet"]
+        game_ids = [res[GAMELOG_GAME_ID_INDEX] for res in results]
+        dates = [
+            datetime.strptime(res[GAMELOG_DATE_INDEX].replace(",", ""), "%b %d %Y")
+            for res in results
+        ]
+
+        for pair in zip(dates, game_ids):
+            bisect.insort_left(all_games, pair)
+        # Reverse the game id list!
+        team_games.append((tid, game_ids[::-1]))
+        name = teams.find_team_name_by_id(tid)["full_name"]
+        print(name + " done...")
+
+    # deduplicate games
+    all_games = OrderedDict((x, True) for x in all_games).keys()
+    return team_games, list(all_games)
+
+
+def get_boxscores_api(team_ids):
+    # dictionary with every player id
+    team_games, all_games = get_games_api(team_ids)
+
+    players_dict = fill_player_dict(all_games)
+    player_game_count_dict = dict.fromkeys(
+        [player["id"] for player in players.get_players()]
+    )
+    for key in player_game_count_dict:
+        player_game_count_dict[key] = 0
+
+    print("-------------------------------------------------")
+    print("All games loaded. Beginning game by game calculations...")
+    print("-------------------------------------------------")
+
+    for game_info in team_games:
+        team_id = game_info[0]
+        print(
+            "Running calculations for "
+            + str({teams.find_team_name_by_id(team_id)["full_name"]})
+            + "..."
+        )
+        game_set = game_info[1]
+        i = 0
+        for game_id in game_set:
+            print(str(i) + " games done")
+            i += 1
+            boxscore = boxscoreadvancedv2.BoxScoreAdvancedV2(
+                game_id=game_id
+            ).get_dict()["resultSets"][0]["rowSet"]
+
+            print("writing temp file for game: " + str(game_id))
+            with open(f"games{SEASON.split('-')[0]}/{game_id}", "w") as file:
+                file.write(json.dumps(boxscore))
+
+
+######################################################################
+
+# This is a helper method. If you are calling it directly, you
+# are likely making a mistake
 def win_loss_per_roster(list_game_ids, season_games, season):
     data = []
-
+    # Note: The below logic must be updated if new seasons are added
     path = ""
     if season == "2017":
         path = "games2017"
@@ -80,6 +154,8 @@ def win_loss_per_roster(list_game_ids, season_games, season):
     return data
 
 
+# This is a helper method. If you are calling it directly, you
+# are likely making a mistake
 def fill_player_dict(all_games):
     player_dict = {}
     for player in players.get_players():
@@ -90,114 +166,8 @@ def fill_player_dict(all_games):
     return player_dict
 
 
-def get_games_api(team_ids):
-    print("Loading game lists...")
-    team_games = []
-    all_games = []
-    for tid in team_ids:
-        team_log = teamgamelog.TeamGameLog(
-            season=SEASON, season_type_all_star=SEASON_TYPE, team_id=tid
-        ).get_dict()
-        results = team_log["resultSets"][0]["rowSet"]
-        game_ids = [res[GAMELOG_GAME_ID_INDEX] for res in results]
-        dates = [
-            datetime.strptime(res[GAMELOG_DATE_INDEX].replace(",", ""), "%b %d %Y")
-            for res in results
-        ]
-
-        for pair in zip(dates, game_ids):
-            bisect.insort_left(all_games, pair)
-        # Reverse the game id list!
-        team_games.append((tid, game_ids[::-1]))
-        name = teams.find_team_name_by_id(tid)["full_name"]
-        print(name + " done...")
-
-    # deduplicate games
-    all_games = OrderedDict((x, True) for x in all_games).keys()
-    return team_games, list(all_games)
-
-
-def create_player_matrix_from_api(team_ids):
-    # dictionary with every player id
-
-    team_games, all_games = get_games_api(team_ids)
-
-    players_dict = fill_player_dict(all_games)
-    player_game_count_dict = dict.fromkeys(
-        [player["id"] for player in players.get_players()]
-    )
-    for key in player_game_count_dict:
-        player_game_count_dict[key] = 0
-
-    print("-------------------------------------------------")
-    print("All games loaded. Beginning game by game calculations...")
-    print("-------------------------------------------------")
-
-    for game_info in team_games:
-        team_id = game_info[0]
-        print(
-            "Running calculations for "
-            + str({teams.find_team_name_by_id(team_id)["full_name"]})
-            + "..."
-        )
-        game_set = game_info[1]
-        i = 0
-        for game_id in game_set:
-            print(str(i) + " games done")
-            i += 1
-            boxscore = boxscoreadvancedv2.BoxScoreAdvancedV2(
-                game_id=game_id
-            ).get_dict()["resultSets"][0]["rowSet"]
-
-            print("writing temp file for game: " + str(game_id))
-            with open("games/{" + str(game_id), "w") as file:
-                file.write(json.dumps(boxscore))
-
-            for player_line in boxscore:
-                if player_line[BOXSCORE_TEAM_ID] == team_id:
-                    # update player matrix
-                    if player_line[BOXSCORE_STAT_START] is None:
-                        # DNP (coach's decision) case
-                        continue
-                    player_line[BOXSCORE_STAT_START] = int(
-                        player_line[BOXSCORE_STAT_START].split(":")[0]
-                    ) * 60 + int(player_line[BOXSCORE_STAT_START].split(":")[1])
-                    players_dict[player_line[BOXSCORE_PLAYER_ID]][game_id] = np.array(
-                        player_line[BOXSCORE_STAT_START:]
-                    )
-        print("-------------------------------------------------")
-
-    prev_game_id = all_games[0][1]
-    for chron_game in all_games:
-        chron_game_id = chron_game[1]
-        for p_id in players_dict:
-            if players_dict[p_id][chron_game_id] is not None:
-                if chron_game_id != prev_game_id:
-                    if players_dict[p_id][prev_game_id] is not None:
-                        players_dict[p_id][chron_game_id] = (
-                            (player_game_count_dict[p_id] - 1)
-                            * players_dict[p_id][chron_game_id]
-                        ) + players_dict[p_id][prev_game_id]
-                        player_game_count_dict[p_id] += 1
-                        players_dict[p_id][chron_game_id] = (
-                            players_dict[p_id][chron_game_id]
-                            / player_game_count_dict[p_id]
-                        )
-                else:
-                    player_game_count_dict[p_id] = 1
-            else:
-                players_dict[p_id][chron_game_id] = players_dict[p_id][prev_game_id]
-        prev_game_id = chron_game_id
-
-    for player in players_dict:
-        for game in players_dict[player]:
-            if players_dict[player][game] is None:
-                players_dict[player][game] = np.zeros(23)
-    # The final dictionary is: (num_players, num_games, num_stats)
-    # each player id and game id is a key. The stats are stored in a numpy array
-    return players_dict, all_games
-
-
+# This is a helper method. If you are calling it directly, you
+# are likely making a mistake
 def remove_away_teams(games):
     res = []
     for game in games:
@@ -206,6 +176,30 @@ def remove_away_teams(games):
     return res
 
 
+# This is a helper method. If you are calling it directly, you
+# are likely making a mistake
+def get_games_local(season):
+    if season == "2017":
+        ag_path = "games2017/all_games.npy"
+        tg_path = "games2017/team_games.npy"
+    elif season == "2018":
+        ag_path = "games2018/all_games.npy"
+        tg_path = "games2018/team_games.npy"
+    else:
+        print(season)
+        print(season == "2017")
+        print(season == "2018")
+        print("SEASON NOT AVAILABLE")
+        sys.exit(0)
+    ag = file_dumps.read_numpy_arr(ag_path)
+    tg = file_dumps.read_numpy_arr(tg_path)
+
+    return tg, ag
+
+
+# This method will create a list where each row is:
+# (game_id, home roster, away roster, home_team_wins?, home team_id)
+# That will be a very big list, which it will then dump to a file
 def create_wl_per_roster_from_local(outfile, season_str):
     _, ag = get_games_local(season_str)
     print("loaded games...")
@@ -242,25 +236,11 @@ def create_wl_per_roster_from_local(outfile, season_str):
     file_dumps.write_np_arr(wlpr, outfile)
 
 
-def get_games_local(season):
-    if season == "2017":
-        ag_path = "games2017/all_games.npy"
-        tg_path = "games2017/team_games.npy"
-    elif season == "2018":
-        ag_path = "games2018/all_games.npy"
-        tg_path = "games2018/team_games.npy"
-    else:
-        print(season)
-        print(season == "2017")
-        print(season == "2018")
-        print("SEASON NOT AVAILABLE")
-        sys.exit(0)
-    ag = file_dumps.read_numpy_arr(ag_path)
-    tg = file_dumps.read_numpy_arr(tg_path)
-
-    return tg, ag
-
-
+# This method will create a dictionary of dictionaries.
+# The first set of keys is every player_id. The second set is
+# every game_id. So for every player, we can look up every game.
+# At that address, we store an array with the players season averages AFTER
+# that game.
 def create_player_matrix_from_local(filename, season):
     path = ""
     if season == "2017":
@@ -317,6 +297,9 @@ def create_player_matrix_from_local(filename, season):
                     )
     print("-------------------------------------------")
     print("Filling in time step blanks...")
+    # In the above code, we simply filled in every night with
+    # each players stats from that night. Now we sweep through
+    # and calculate the average after that night.
     prev_game_id = all_games[0][1]
     for chron_game in all_games:
         chron_game_id = chron_game[1]
@@ -349,6 +332,7 @@ def create_player_matrix_from_local(filename, season):
     file_dumps.write_player_dict(players_dict, filename)
 
 
+# This function will retrieve a previously saved player matrix and w/l per roster array
 def get_data(roster_file, matrix_file):
     nparr = file_dumps.read_numpy_arr(roster_file)
     pd = file_dumps.read_json(matrix_file)
@@ -356,7 +340,9 @@ def get_data(roster_file, matrix_file):
     return pd, nparr
 
 
-def get_rnn_data(wl_per_rosters, player_matrix):
+# This function takes wl_per_rosters and player_matrix and returns
+# a 3d matrix where each team, each player, and the stats are dimensions
+def get_3d_data(wl_per_rosters, player_matrix):
     teams_list = teams.get_teams()
     team_index_map = {}
 
@@ -375,6 +361,9 @@ def get_rnn_data(wl_per_rosters, player_matrix):
     return final_data, game_list
 
 
+# This function returns a matrix where each game has been
+# flattened to a single row, by appending each players stats
+# to one another. The final shape is therefore: 1230 x 598
 def get_2d_data(wl_per_rosters, player_matrix):
     data = []
     games = []
@@ -424,6 +413,7 @@ def get_2d_data(wl_per_rosters, player_matrix):
 
 
 if __name__ == "__main__":
+    # Running this will create the files required to run the project
     create_player_matrix_from_local("final_data/player_dict_2017.json", "2017")
     create_wl_per_roster_from_local("final_data/wl_per_rosters_2017.npy", "2017")
     create_player_matrix_from_local("final_data/player_dict_2018.json", "2018")
