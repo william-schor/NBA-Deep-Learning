@@ -340,27 +340,6 @@ def get_data(roster_file, matrix_file):
     return pd, nparr
 
 
-# This function takes wl_per_rosters and player_matrix and returns
-# a 3d matrix where each team, each player, and the stats are dimensions
-def get_3d_data(wl_per_rosters, player_matrix):
-    teams_list = teams.get_teams()
-    team_index_map = {}
-
-    for index, team in enumerate(teams_list):
-        team_index_map[team["id"]] = index
-
-    final_data = [[] for _ in range(len(teams_list))]
-
-    data_2d, game_list = get_2d_data(wl_per_rosters, player_matrix)
-
-    home_teams = [game[4] for game in wl_per_rosters]
-    for data, team in zip(data_2d, home_teams):
-        index = team_index_map[team]
-        final_data[index].append(data)
-
-    return final_data, game_list
-
-
 # This function returns a matrix where each game has been
 # flattened to a single row, by appending each players stats
 # to one another. The final shape is therefore: 1230 x 598

@@ -3,7 +3,18 @@ import numpy as np
 import preprocess
 from utilites import lines
 from utilites import model_profit
+import argparse
+import sys
 
+parser = argparse.ArgumentParser(description="Pick a model.")
+parser.add_argument("--dense", action="store_true")
+parser.add_argument("--team_conv", action="store_true")
+parser.add_argument("--player_conv", action="store_true")
+args = parser.parse_args()
+
+if not args.dense and not args.team_conv and not args.player_conv:
+    print("Please provide an argument to select a model")
+    sys.exit(0)
 
 print("loading data...")
 pd2017, wlpr2017 = preprocess.get_data(
@@ -36,9 +47,17 @@ test_game_ids = games2018
 
 ###############
 from models import dense_model
-from models import convolution_model
+from models import player_level_convolution
+from models import team_level_convolution
 
-model, epochs_val, learning_rate = dense_model.get_model()
+if args.dense:
+    model, epochs_val, learning_rate = dense_model.get_model()
+
+elif args.team_conv:
+    model, epochs_val, learning_rate = team_level_convolution.get_model()
+
+elif args.player_conv:
+    model, epochs_val, learning_rate = player_level_convolution.get_model()
 ###############
 
 
